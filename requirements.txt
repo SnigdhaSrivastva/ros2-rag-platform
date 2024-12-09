@@ -1,0 +1,9 @@
+pymongo[srv]
+qdrant-client
+sentence-transformers
+transformers
+gradio
+fastapi
+uvicorn
+requests
+clearml
