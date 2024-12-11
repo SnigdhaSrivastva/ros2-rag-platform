@@ -105,10 +105,14 @@ Scalability: Expand the system to handle larger datasets and more complex querie
 Contributors
 
 Member 1 – Aryan Donde
+
+
 Github: https://github.com/ARDA7787
+
 Huggingface: https://huggingface.co/ArmaanDhande
 
 Member 2 – Dhruv Pandoh 
+
 Github: https://github.com/dhruvpandoh
 
 ## Docker Setup
