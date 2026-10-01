@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass
 
 from pymongo import MongoClient
 from qdrant_client import QdrantClient
@@ -11,29 +10,7 @@ from qdrant_client.http.models import Distance, PointStruct, VectorParams
 from config import get_settings
 from embedding import EmbeddingService
 from logging_config import configure_logging
-
-
-@dataclass
-class Chunk:
-    text: str
-    chunk_id: int
-
-
-def chunk_text(text: str, chunk_size: int = 900, overlap: int = 150) -> list[Chunk]:
-    text = " ".join(text.split())
-    if not text:
-        return []
-    chunks = []
-    start = 0
-    idx = 0
-    while start < len(text):
-        end = min(len(text), start + chunk_size)
-        chunks.append(Chunk(text=text[start:end], chunk_id=idx))
-        if end == len(text):
-            break
-        start = max(end - overlap, start + 1)
-        idx += 1
-    return chunks
+from text_processing import chunk_text
 
 
 def ensure_collection(client: QdrantClient, collection_name: str, vector_size: int) -> None:

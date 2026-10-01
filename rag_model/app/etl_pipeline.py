@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,6 +10,7 @@ from pymongo import MongoClient, UpdateOne
 
 from config import get_settings
 from logging_config import configure_logging
+from text_processing import same_domain_links
 
 
 def scrape(url: str) -> tuple[str, list[str]]:
@@ -36,10 +37,9 @@ def crawl(seed: str, max_pages: int = 40) -> list[dict]:
         try:
             text, links = scrape(url)
             docs.append({'url': url, 'text_content': text, 'source': domain, 'ingested_at': int(time.time())})
-            for link in links:
-                absolute = urljoin(url, link)
-                if urlparse(absolute).netloc == domain and absolute not in seen:
-                    queue.append(absolute)
+            for link in same_domain_links(url, links, domain):
+                if link not in seen:
+                    queue.append(link)
         except Exception:
             continue
     return docs

@@ -11,22 +11,11 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from config import get_settings
 from embedding import EmbeddingService
 from logging_config import configure_logging
+from text_processing import build_prompt, collect_contexts
 
 settings = get_settings()
 configure_logging(settings.log_level)
 logger = logging.getLogger(__name__)
-
-
-def build_prompt(question: str, contexts: list[str]) -> str:
-    context = "\n\n".join(contexts)
-    return (
-        "You are a production ROS2 expert assistant. "
-        "Answer the question using ONLY the provided context. "
-        "If context is insufficient, say what is missing.\n\n"
-        f"Question: {question}\n\n"
-        f"Context:\n{context}\n\n"
-        "Return a concise, implementation-focused answer with bullet points."
-    )
 
 
 class QuestionRequest(BaseModel):
@@ -78,14 +67,7 @@ def ask_question(request: QuestionRequest):
         if not hits:
             raise HTTPException(status_code=404, detail='No relevant context found')
 
-        contexts = []
-        sources = []
-        for hit in hits:
-            payload = hit.payload or {}
-            text = (payload.get('text') or '').strip()
-            if text:
-                contexts.append(text)
-                sources.append(payload.get('url') or payload.get('source') or 'unknown')
+        contexts, sources = collect_contexts(hit.payload for hit in hits)
 
         if not contexts:
             raise HTTPException(status_code=404, detail='Retrieved context is empty')
